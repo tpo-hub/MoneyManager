@@ -1,0 +1,112 @@
+﻿@model IEnumerable<IndexCountsViewModel>
+@{
+    ViewData["Title"] = "Cuentas";
+    var actives = @Model.Select(x => x.BalancePositive).Sum();
+    var pasives = @Model.Select(x => x.BalanceNegative).Sum();
+    var total = actives - pasives;
+    string BalanceFormat(decimal balance)
+    {
+        return Math.Abs(balance).ToString("N");
+    }
+    string getClassBalance(bool condition)
+    {
+        return condition == true ? "color: green;" : "color: red;";
+    }
+    string getClassHeaderBalance(decimal condition)
+    {
+        return condition >= 0 ? "color: green;" : "color: red;";
+    }
+
+    string addIcon()
+    {
+        return total >= 0 ? "color: green;" : "color: red;";
+    }
+}
+<h5>
+    La cuenta se refiere a los distintos balances que tenes:
+    <i>Tarjestas, cuentas de ahorro, prestamos, etc.</i>
+</h5>
+
+
+<a asp-action="Create" class="btn btn-primary mb-3">Crear nueva cuenta</a>
+
+<div class="mb-5 mt-2 total-Container">
+    <div>
+        <strong>Activos</strong>
+        <div class="badge badge-success">
+            @BalanceFormat(actives)
+        </div>
+    </div>
+    <div>
+        <strong>Pasivos</strong>
+        <span id="icon"></span>
+        <div class="badge badge-danger">
+            @BalanceFormat(pasives)
+        </div>
+    </div>
+    <div>
+        <strong>Total</strong>
+        <div id="total" class="badge badge-info">
+            @BalanceFormat(total)
+        </div>
+    </div>
+
+</div>
+
+<div class="accordion acordeon-counts">
+    <div class="card">
+        @foreach (var countType in Model)
+        {
+            <div class="accordion-item">
+                <div class="card-header">
+                    <h2 class="accordion-header" id="cabeceraUno">
+                        @{
+                            var id = countType.CountType.Replace(" ", "");
+                            var dataBSTarget = "#" + id;
+                            var claseTipoCuenta = getClassHeaderBalance(countType.BalancePositive - countType.BalanceNegative);
+                        }
+                        <button class="btn btn-info" type="button" data-toggle="collapse"
+                                data-target="@dataBSTarget">
+                            <span class=""><strong>@countType.CountType</strong> </span>
+                        </button>
+                        <span style="@claseTipoCuenta font-size:20px; padding-left:2rem;">@BalanceFormat(countType.BalancePositive - countType.BalanceNegative) </span>
+                    </h2>
+                </div>
+                <div id="@id" class="accordion-collapse collapse show">
+                    <div class="card-body">
+                        <div>
+                            <ul class="list-group">
+                                @foreach (var count in countType.Counts)
+                                {
+                                    var claseCuenta = getClassBalance(count.Condition);
+                                    <li class="list-group-item">
+                                        <span>
+                                            <a  asp-action="Details" asp-route-id="@count.Id"><strong>@count.Name</strong></a> 
+                                            <a asp-action="Edit" asp-route-id="@count.Id" class="btn-primary btn">
+                                                <i class="bi-pencil-fill"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@count.Id" class="btn-danger btn">
+                                                <i class="bi-trash-fill"></i>
+                                            </a>
+                                        </span>
+
+                                        <span style="@claseCuenta">@BalanceFormat(count.Balance)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles{
+    <style>
+        #total:hover{
+            @addIcon()
+        }
+    </style>
+
+}

@@ -1,0 +1,98 @@
+﻿@model CreateTransactionViewModel
+@{
+    ViewData["Title"] = "Crear";
+}
+<h5>Una transaccion te permite indicar tus ingresos y gastos</h5>
+
+<form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="DateTransaction" class="form-label"></label>
+        <input asp-for="DateTransaction" class="form-control" />
+        <span asp-validation-for="DateTransaction" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TransactionType" class="form-label"></label>
+        <select asp-for="TransactionType" asp-items="Html.GetEnumSelectList<OperationType>()" class="custom-select"></select>
+        <span asp-validation-for="TransactionType" class="text-danger"></span>
+    </div>
+
+    <div id="counts" class="mb-3">
+        <label asp-for="CountId" class="form-label"></label>
+        <select asp-for="CountId" asp-items="Model.Counts" class="custom-select">
+            <option value=""> - </option>
+        </select>
+        <span asp-validation-for="CountId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Mount" class="form-label"></label>
+        <input asp-for="Mount" class="form-control" />
+        <span asp-validation-for="Mount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Note" class="form-label"></label>
+        <textarea asp-for="Note" class="form-control"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <div class="m-3">
+            <a class="btn btn-info" asp-action="Index">Volver</a>
+            <button type="submit" class="btn btn-success">Crear</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+    const url = '@Url.Action("GetCategoriesJson")';
+    const urlCounts = '@Url.Action("GetCountsJson")';
+
+    $(function () {
+        $("#TransactionType").change(async function(){
+            const value = $(this).val();
+            const data = await fetch(url, {
+                method: 'POST',
+                body: value,
+                headers: {
+                    'Content-Type' : 'application/json'
+                }
+            });
+            const json = await data.json();
+            const options = json.map(x => `<option value=${x.value}>${x.text}</option>`)
+            $("#CategoryId").html(options);
+
+            const Seconddata = await fetch(urlCounts, {
+                method: 'POST',
+                body: value,
+                headers: {
+                    'Content-Type' : 'application/json'
+                }
+            });
+
+            const Secondjson = await Seconddata.json();
+            const secondOptions = Secondjson.map(x => `<option value=${x.value}>${x.text}</option>`)
+            $("#CountId").html(secondOptions);
+
+
+
+
+        })
+
+
+        
+
+
+
+    })
+</script>
+}

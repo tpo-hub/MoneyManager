@@ -1,0 +1,39 @@
+﻿@model MoneyManager.Models.Category
+
+@{
+    ViewData["Title"] = "Crear";
+}
+
+<h2>Crear categoria</h2>
+<h4>La categoria nos permite indicar en que gastamos el dinero y de donde provienen los ingresos </h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+          
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="TransactionTypeId" class="control-label"></label>
+                <select asp-for="TransactionTypeId" class="custom-select">
+                    <option value="1"> Ingreso</option>
+                    <option value="2">Gasto </option>
+                </select>
+                <span asp-validation-for="TransactionTypeId" class="text-danger"></span>
+            </div>
+            <div class="">
+                <a class="btn btn-info" asp-action="Index">Volver</a>
+                <button type="submit" class="btn btn-success">Crear</button>
+            </div>
+        </form>
+    </div>
+</div>
+          
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

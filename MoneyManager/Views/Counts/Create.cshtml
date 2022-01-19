@@ -1,0 +1,63 @@
+﻿@model MoneyManager.Models.CreateCountViewModel
+
+@{
+    ViewData["Title"] = "Crear";
+}
+<h3>Crear Cuenta</h3>
+<h5>La cuenta se refiere a los distintos balances que tenes:</h5>
+<h5><i>Tarjestas, cuentas de ahorro, prestamos, etc.</i></h5>
+<hr />
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CountTypeId" class="form-label"></label>
+                <select asp-for="CountTypeId" asp-items="Model.CountsType" class="custom-select">
+                </select>
+                <span asp-validation-for="CountTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Balance" class="form-label"></label>       
+                <p><i>usar punto no coma</i></p>
+                <input asp-for="Balance" class="form-control" />
+                <span asp-validation-for="Balance" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Condition" class="form-label"></label>
+                <select asp-for="Condition" class="custom-select">
+                    <option value="false">Egreso</option>
+                    <option value="true">Ingreso</option>
+                </select>
+                <span asp-validation-for="Condition" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <div class="m-3">
+                    <a class="btn btn-info" asp-action="Index">Volver</a>
+                    <button type="submit" class="btn btn-success">Crear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

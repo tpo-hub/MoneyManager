@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container d-flex">
+    <div id="calendario" style="width: 38vw; height:25vh"></div>
+    <div style="width: 40vw; height: 30vh" class="text-center">
+        <input id="inputChange" class="disabled" type="checkbox" checked data-toggle="toggle" data-on="Gastos" data-off="Ingresos" data-onstyle="danger" data-offstyle="success">
+        <canvas id="myChart"></canvas>
+        <div class="p-3" id="myDates"></div>
+
+    </div>
+</div>
+@section Styles{
+   <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <style>
+        #inputChange {
+            cursor: pointer
+        }
+    </style>
+
+}
+@section Scripts{
+    <script src="~/lib/fullcalendar/main.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script>
+
+        $(function () {
+            const calendarioEl = document.getElementById('calendario');
+            const calendario = new FullCalendar.Calendar(calendarioEl, {
+                dayMaxEventRows: 3,
+                initialView: 'dayGridMonth',
+                events: 'Home/GetCalendar'
+            })
+            calendario.setOption('locale', 'es');
+            calendario.render();
+
+        })
+
+        const dataNegative =  @Html.Raw(Json.Serialize(ViewBag.pasives))
+        const dataPositive =  @Html.Raw(Json.Serialize(ViewBag.actives))
+        class Obj {
+            constructor(name, value) {
+                this.name = name,
+                this.value = value
+            }
+        }
+            const arrayObj = [];
+            const ObjDate = [];
+            const daysSpanish = [ //array para hacer mapeo de dias
+                'lunes',
+                'martes',
+                'miércoles',
+                'jueves',
+                'viernes',
+                'sábado',
+                'domingo'
+            ];
+        const chargeData = (data) => {
+            data.forEach(e => {
+                let test = arrayObj.find(x => x.name == e.category);
+                let testDate = ObjDate.find(x => x.name == daysSpanish[new Date(e.date).getDay()]);
+                if (test != null) {
+                    test.value = test.value + e.mount
+                }
+                else {
+                    arrayObj.push(new Obj(e.category, e.mount))
+                }
+
+                if (testDate != null) {
+                    testDate.value = testDate.value + e.mount
+                }
+                else {
+                    ObjDate.push(new Obj(daysSpanish[new Date(e.date).getDay()], e.mount))
+                }
+
+
+            });
+        }
+        chargeData(dataNegative);
+        const  ctx = document.getElementById('myChart');
+            const myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: arrayObj.map(x => x.name),
+                    datasets: [{
+                        label: '# of Votes',
+                        data: arrayObj.map(x => x.value),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+       let DayExpensive = ObjDate.find(x => x.value == Math.max.apply(null, ObjDate.map(x => x.value)));
+       document.getElementById("myDates").innerHTML = `<div class="alert alert-danger">Con un total de ${DayExpensive.value}, el dia <strong>${DayExpensive.name}</strong> es el dia que mas gastas dinero</div>`
+    </script>
+
+}

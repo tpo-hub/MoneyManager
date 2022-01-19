@@ -1,0 +1,66 @@
+﻿@model ReportTransactionDetails
+
+@{
+    ViewData["Title"] = "Detalles de cuenta";
+    string getClassBalance(bool condition)
+    {
+        return condition == true ? "color: green;" : "color: red;";
+    }
+}
+<h3>Detalle de transacciones de @ViewBag.CountName</h3>
+
+<a asp-action="ExportToExcel" asp-route-mounth="@ViewBag.LastMouth"
+asp-route-year="@ViewBag.LastYear"class="btn btn-outline-success mb-3">Exportar a excel todas las transacciones disponibles en este periodo</a>
+
+<h4>
+    <a asp-route-mounth="@ViewBag.LastMouth" asp-route-year="@ViewBag.LastYear"
+       class="btn btn-secondary"><i class="bi-chevron-left"></i></a>
+    @Model.StartDate.ToString("MMM")-@Model.StartDate.Year
+    <a asp-route-mounth="@ViewBag.NextMouth" asp-route-year="@ViewBag.NextYear"
+       class="btn btn-secondary"><i class="bi-chevron-right"></i></a>
+</h4>
+
+<div class="total-Container mb-3">
+    <div>
+        Balance: <span style="@getClassBalance(ViewBag.CountCondition)">@Model.BalanceDeposits</span> <hr />
+    </div>
+</div>
+
+@if (Model.TransactionGroup.Count() == 0)
+{
+    <h5>No hay datos para mostrar</h5>
+}
+else
+{
+    <table class="table">
+        <tbody>
+            @foreach (var transaction in Model.TransactionGroup)
+            {
+                <tr style="background-color: lightblue; font-size: 26px">
+                    <td colspan="3">
+                        @transaction.DateTransaction.Day
+                        <span class="badge bg-secondary">
+                            @transaction.DateTransaction.ToString("ddd")
+                        </span>
+                    </td>
+                    <td style="@getClassBalance(ViewBag.CountCondition)">@transaction.BalanceDeposits.ToString("N")</td>
+                </tr>
+                @foreach (var transaccions in transaction.Transactions)
+                {
+                    <tr style="vertical-align: middle">
+                        <td>@transaccions.Category</td>
+                        <td>@transaccions.Note</td>
+                        <td class="">
+                            @(transaccions.TransactionType == OperationType.Ingreso
+                            ? transaccions.Mount.ToString("N") : null)
+                        </td>
+                        <td class="">
+                            @(transaccions.TransactionType == OperationType.Gasto
+                            ? transaccions.Mount.ToString("N") : null)
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}

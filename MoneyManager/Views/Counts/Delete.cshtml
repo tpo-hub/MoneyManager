@@ -1,0 +1,12 @@
+﻿@model MoneyManager.Models.CreateCountViewModel
+
+@{
+    ViewData["Title"] = "Borrar";
+}
+<h3>Estas seguro que queres borrar @Model.Name?</h3>
+<div>
+    <form asp-action="Delete">
+        <a asp-action="Index">Volver</a> |
+        <input type="submit" value="Borrar" class="btn btn-danger" /> 
+    </form>
+</div>

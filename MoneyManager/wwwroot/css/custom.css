@@ -1,0 +1,46 @@
+﻿#sorteable tr{
+    cursor: move
+}
+
+.total-Container{
+    display: flex;
+    justify-content: space-around;
+    font-size: 26px;
+    text-align: center;
+}
+
+.total-Container .IsPasive {
+    color: red;
+}
+
+.total-Container .Isactive {
+    color: forestgreen;
+}
+
+.total{
+    border-color: black;
+}
+﻿.acordeon-counts button {
+    color: black !important;
+    font-size: 15px;
+}
+
+.acordeon-counts button > span {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.acordeon-counts ul li {
+    display: flex;
+    justify-content: space-between;
+}
+
+.acordeon-counts .accordion-collapse {
+    font-size: 18px;
+}
+
+.item-custom:hover {
+    color: #b0a9a9;
+   
+}
