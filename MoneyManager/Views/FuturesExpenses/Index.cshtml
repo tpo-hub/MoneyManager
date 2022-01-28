@@ -1,0 +1,68 @@
+﻿@model IEnumerable<FutureExpenses> 
+@{
+    ViewData["Title"] = "Pagos pendientes";
+}
+<div class="container">
+    <h3>Pagos pendientes</h3>
+    <hr />
+    <div class="mb-3">
+        <div>
+            <a asp-action="Create" class="btn btn-primary mb-3">Crear un pago pendiente</a>
+        </div>
+    </div>
+     <div id="alert"></div>
+    <div class="card-deck">
+        @foreach (var index in Model)
+        {
+            <div class="card" style="width: 10rem;">
+                <div class="card-body">
+                    <h5 class="card-title">@index.Name</h5>
+                    <p class="card-text">@index.Description</p>
+                    <hr />
+                    <p>@index.Mount</p>
+                    <hr />
+                    <button id="btnPay" name="@index.Id" class="btn btn-pago btn-danger text-white">Pagar</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        let url = '@Url.Action("Delete", "FuturesExpenses")'
+        $(".btn-pago").on("click", function (e) {
+            let tis = $(this);
+            e.preventDefault();
+            let id = $(this).attr("name")
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: { id },
+                success: function (response) {
+                    if (response.success == "True") {
+                        tis.html("Pagado!")
+                        tis.switchClass("btn-danger", "btn-success")
+                        GetAlert(response.message, "success")
+                    }
+                    else {
+                        tis.switchClass("btn-danger", "btn-warning")
+                        GetAlert(response.message, "warning")
+                    }
+
+                }
+            })
+        })
+
+        function GetAlert(message, state) {
+            $("#alert").html(`
+                            <div class="alert alert-${state}" role="alert">
+                              ${message}
+                            </div>`)
+            $('#alert').fadeIn();
+            setTimeout(function () {
+                $("#alert").fadeOut();
+            }, 2000);
+        }
+    </script>
+}

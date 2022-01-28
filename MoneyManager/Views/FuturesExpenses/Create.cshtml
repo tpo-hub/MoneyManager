@@ -1,0 +1,50 @@
+﻿@model MoneyManager.Models.FutureExpenses
+
+<h4>Pago pendiente</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label">Nombre</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Date" class="control-label">Fecha</label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Mount" class="control-label">Monto a pagar</label>
+                <input asp-for="Mount" class="form-control" />
+                <span asp-validation-for="Mount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label">Descripcion</label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div id="counts" class="mb-3">
+                <label asp-for="CountId" class="form-label"></label>
+                <select asp-for="CountId" asp-items="ViewBag.Counts" class="custom-select">
+                    <option value=""> - </option>
+                </select>
+                <span asp-validation-for="CountId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="m-3">
+                    <a class="btn btn-info" asp-action="Index">Volver</a>
+                    <button type="submit" class="btn btn-success">Crear</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
