@@ -6,3 +6,92 @@
 
 <h4>Indice de transacciones</h4>
 <a asp-action="Create" class="btn btn-primary mb-3">Crear una nueva transaccion</a>
+<div id="content"></div>
+<div id="result"></div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+    function loadForm() {
+        document.getElementById("content").innerHTML = `<div  class="col-7">
+                                             <form action="/" method="post" class="form-row">
+                                            <div>
+                                                <div class="col p-2">
+                                                    <label>Busqueda transaccion por categoria </label>
+                                                    <select id="TransactionType" class="form-control">
+                                                    </select>
+                                                    <select id="Categories" class="form-control"  style="margin-top: 10px"><option value="">seleccionar categoria</option></select>
+                                                    <button type="submit"  id="dataName" class="btn btn-primary mb-3" style="margin-top: 10px">Buscar</button>
+                                                </div>
+                                            </div>
+                                      </form >
+                                 <hr />
+                                    <form action="/" method="post" class="form-row">
+                                        <div>
+                                            <div class="col p-2">
+                                                <label>Busqueda transaccion por Descripcion </label>
+                                                <input type="text" class="form-control form-control-sm" />
+                                                <button id="dataDescription" type="submit" class="btn btn-primary mb-3" style="margin-top: 10px">Buscar</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                <hr />
+                                    <form action="/" method="post" class="form-row">
+                                        <div>
+                                            <div class="col p-2">
+                                                <label>Busqueda transaccion por fecha </label>
+                                                <input type="date" class="form-control form-control-sm" />
+                                                <button id="dataDate" type="submit" class="btn btn-primary mb-3" style="margin-top: 10px">Buscar</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                        </div>`
+    }
+
+    function deleteForm() {
+        document.getElementById("content").innerHTML = ""
+        $("content").fadeOut('slow')
+    }
+
+    document.addEventListener("load", loadForm());
+
+    document.getElementById("dataDate").addEventListener("click", () => {
+        deleteForm()
+    })
+
+    document.getElementById("dataName").addEventListener("click", () => {
+        deleteForm()
+    })
+
+    document.getElementById("dataDescription").addEventListener("click", () => {
+        deleteForm()
+    })
+
+    const url = '@Url.Action("GetCategoriesJson")';
+
+    document.getElementById("TransactionType").innerHTML = `
+       <option value="0">seleccionar Ingreso-Gasto</option>
+       <option value="1">Ingreso</option>
+       <option value="2">Gasto</option>`
+
+    document.getElementById("TransactionType").addEventListener("change", async function () {
+        const data = await fetch(url, {
+            method: 'POST',
+            body: $(this).val(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const json = await data.json();
+        const options = json.map(x => `<option value=${x.value}>${x.text}</option>`)
+        $("#Categories").html(options);
+
+    })
+
+
+
+
+
+
+</script>        
+
+}

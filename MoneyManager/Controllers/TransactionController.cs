@@ -62,9 +62,36 @@ namespace MoneyManager.Controllers
 
             return View("Index");
         }
-        public ActionResult Edit(int id)
+
+        [HttpPost]
+        public async Task<ActionResult> Edit(int id)
         {
-            return View();
+            var userId = userService.GetUser();          
+            var transaction = await transactionRepository.GetForId(id,userId);
+            var operationType = OperationType.Gasto;
+            if(transaction.TransactionType != operationType)
+            {
+                operationType = OperationType.Ingreso;
+            }
+
+            var transactionVm = new CreateTransactionViewModel()
+            {
+                UserId = userId,
+                DateTransaction = transaction.DateTransaction,
+                Categories = await GetCategories(userId, operationType),
+                TransactionType = transaction.TransactionType,
+                Category = transaction.Category,
+                CategoryId = transaction.CategoryId,
+                Condition = transaction.Condition,
+                Count = transaction.Count,
+                CountId = transaction.CountId,
+                Counts = await GetCounts(userId, transaction.Condition),
+                Mount = transaction.Mount,
+                Id = transaction.Id,
+                Note = transaction.Note
+            };
+
+            return View("Create", transactionVm);
         }
 
         [HttpPost]
@@ -121,7 +148,6 @@ namespace MoneyManager.Controllers
             var userId = userService.GetUser();
             var cats = await GetCategories(userId, transaction);
             return Json(cats);
-
         }
         public async Task<JsonResult> GetCountsJson([FromBody] OperationType transaction)
         {
