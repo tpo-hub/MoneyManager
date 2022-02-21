@@ -19,7 +19,7 @@ namespace MoneyManager.Controllers
         private readonly IRepositoryCounts counts;
         private readonly IRepositoryCategory categories;
 
-        public TransactionController(IUserService userService, 
+        public TransactionController(IUserService userService,
             ITransactionRepository transactionRepository, IMapper mapper,
             IRepositoryCounts counts, IRepositoryCategory categories)
         {
@@ -66,10 +66,10 @@ namespace MoneyManager.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(int id)
         {
-            var userId = userService.GetUser();          
-            var transaction = await transactionRepository.GetForId(id,userId);
+            var userId = userService.GetUser();
+            var transaction = await transactionRepository.GetForId(id, userId);
             var operationType = OperationType.Gasto;
-            if(transaction.TransactionType != operationType)
+            if (transaction.TransactionType != operationType)
             {
                 operationType = OperationType.Ingreso;
             }
@@ -128,7 +128,7 @@ namespace MoneyManager.Controllers
         {
             var Usercounts = await counts.SearchForCondition(userId, condition);
             return Usercounts.Select(x => new SelectListItem(
-                $"{x.Name} - {x.CountType} ", 
+                $"{x.Name} - {x.CountType} ",
                 x.Id.ToString())).ToList();
 
         }
@@ -140,9 +140,9 @@ namespace MoneyManager.Controllers
                 x.Name,
                 x.Id.ToString()
             ));
-        } 
+        }
 
-        
+
         public async Task<JsonResult> GetCategoriesJson([FromBody] OperationType transaction)
         {
             var userId = userService.GetUser();
@@ -153,15 +153,32 @@ namespace MoneyManager.Controllers
         {
             bool condition = true;
             var userId = userService.GetUser();
-            if(transaction.ToString() != "Ingreso")
+            if (transaction.ToString() != "Ingreso")
             {
                 condition = false;
             }
-             var Count = await GetCounts(userId, condition);
+            var Count = await GetCounts(userId, condition);
 
             return Json(Count);
 
         }
+        [HttpGet]
+        public async Task<JsonResult> GetTransactionXdescriptionJson([FromQuery] string description = "" )
+        {
+            var userId = userService.GetUser();
+            try
+            {
+                var transactions = await transactionRepository.GetTransactionsForNote(userId, description);
+                return Json(transactions);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new {error = ex, text = "No se encontraron transacciones"});
+
+            }
+        }
+
 
 
         #endregion

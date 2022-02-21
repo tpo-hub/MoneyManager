@@ -18,6 +18,8 @@ namespace MoneyManager.Services
         Task<IEnumerable<Transaction>> GetTransactionsForExport(GetTransactionForCount model);
         Task<IEnumerable<Transaction>> GetTransactionsForChart(bool condition, int userId);
         Task Update(Transaction transaction, decimal LastMount, int LastCountId);
+        Task<IEnumerable<Transaction>> GetTransactionsForCategory(int userId, int categoryId);
+        Task<IEnumerable<Transaction>> GetTransactionsForNote(int userId, string note);
     }
     public class TransactionRepository : ITransactionRepository
     {
@@ -124,6 +126,24 @@ namespace MoneyManager.Services
             inner join Counts cou on cou.Id = t.CountId
               where t.UserId = @userId and t.Condition = @condition
             ", new { userId, condition});
+        }
+        public async Task<IEnumerable<Transaction>> GetTransactionsForCategory(int userId, int categoryId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Transaction>(@" 
+              SELECT *
+              FROM [MoneyManager].[dbo].[Transaction]
+              where CategoryId =  @categoryId
+            ", new { userId, categoryId});
+        }
+        public async Task<IEnumerable<Transaction>> GetTransactionsForNote(int userId, string note)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Transaction>(@" 
+              SELECT *
+              FROM [MoneyManager].[dbo].[Transaction]
+              where Note = @note
+            ", new { userId, note});
         }
 
     }

@@ -8,8 +8,13 @@
 <a asp-action="Create" class="btn btn-primary mb-3">Crear una nueva transaccion</a>
 <div id="content"></div>
 <div id="result"></div>
+@section Styles{
+    <style src="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"></style>
+ }
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 <script>
     function loadForm() {
         document.getElementById("content").innerHTML = `<div  class="col-7">
@@ -29,7 +34,7 @@
                                         <div>
                                             <div class="col p-2">
                                                 <label>Busqueda transaccion por Descripcion </label>
-                                                <input type="text" class="form-control form-control-sm" />
+                                                <input id="DescriptionForm" type="text" class="form-control form-control-sm" />
                                                 <button id="dataDescription" type="submit" class="btn btn-primary mb-3" style="margin-top: 10px">Buscar</button>
                                             </div>
                                         </div>
@@ -47,23 +52,61 @@
                         </div>`
     }
 
+    function chargeTable(arrayTransaction) {
+        let html = '<ul class="list-group list-group-flush">';
+        console.log(arrayTransaction)
+        arrayTransaction.map(x => {
+            console.log(x.transactionType)
+            let noteTrim = (x.note).trim();
+            if (x.transactionType == 1) {
+                html +=
+                    `<li  class="list-group-item list-group-item-success">
+                        ${noteTrim} - ${x.dateTransaction} - ${x.mount}<li> `
+            }
+            else {
+                html +=
+                    `<li  class="list-group-item list-group-item-danger">
+                        ${noteTrim} - ${x.dateTransaction} - ${x.mount}<li> `
+            }
+        })
+        html += "</ul>"
+        document.getElementById("result").appendChild(document.createElement('div')).innerHTML = html;
+    }
+
     function deleteForm() {
-        document.getElementById("content").innerHTML = ""
-        $("content").fadeOut('slow')
+        const content = document.getElementById("content");
+        for (let i = 1000; i > 0; i--) {
+            let opacity = i - 0.5;
+            setTimeout(() => {
+                content.style.opacity = `${opacity}`
+                if (opacity == 0.5) {
+                    setTimeout(() => { content.innerHTML = "" },500)
+                }
+            }, 500)
+        }
     }
 
     document.addEventListener("load", loadForm());
 
-    document.getElementById("dataDate").addEventListener("click", () => {
+    document.getElementById("dataDate").addEventListener("click",async e => {
+        e.preventDefault();
         deleteForm()
     })
 
-    document.getElementById("dataName").addEventListener("click", () => {
+    document.getElementById("dataName").addEventListener("click", async e => {
+        e.preventDefault();
         deleteForm()
     })
 
-    document.getElementById("dataDescription").addEventListener("click", () => {
+    document.getElementById("dataDescription").addEventListener("click", async e => {
+        e.preventDefault();
+        const urlFetch = '@Url.Action("GetTransactionXdescriptionJson")'
+        const bodyData = $("#DescriptionForm").val()
+        const data = await fetch(urlFetch + "/?description=" + bodyData);
+        const json = await data.json();
+        chargeTable(json);
         deleteForm()
+
     })
 
     const url = '@Url.Action("GetCategoriesJson")';
@@ -92,6 +135,6 @@
 
 
 
-</script>        
+</script>
 
 }
