@@ -1,12 +1,11 @@
 ﻿@model CreateTransactionViewModel
 @{
-    ViewData["Title"] = "Crear";
+    ViewData["Title"] = "Editar";
 }
-<h5>Una transaccion te permite indicar tus ingresos y gastos</h5>
 
-<form asp-action="Create">
+<form asp-action="Edit">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+    <input type="hidden" asp-for="Id" value="@Model.Id" />
     <div class="mb-3">
         <label asp-for="DateTransaction" class="form-label"></label>
         <input asp-for="DateTransaction" class="form-control" />
@@ -83,12 +82,10 @@
             const secondOptions = Secondjson.map(x => `<option value=${x.value}>${x.text}</option>`)
             $("#CountId").html(secondOptions);
 
+
+
+
         })
-
-
-
-
-
 
     })
     </script>

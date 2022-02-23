@@ -63,11 +63,10 @@ namespace MoneyManager.Controllers
             return View("Index");
         }
 
-        [HttpPost]
         public async Task<ActionResult> Edit(int id)
         {
             var userId = userService.GetUser();
-            var transaction = await transactionRepository.GetForId(id, userId);
+            var transaction = await transactionRepository.SearchForId(userId, id);
             var operationType = OperationType.Gasto;
             if (transaction.TransactionType != operationType)
             {
@@ -91,38 +90,45 @@ namespace MoneyManager.Controllers
                 Note = transaction.Note
             };
 
-            return View("Create", transactionVm);
+            return View(transactionVm);
         }
 
+
         [HttpPost]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(CreateTransactionViewModel transactionVm)
+        {
+            var userId = userService.GetUser();
+            if (!ModelState.IsValid)
+            {
+                return View(transactionVm);
+            }
+            if (transactionVm.TransactionType == OperationType.Gasto)
+            {
+                transactionVm.Condition = false;
+            }
+            transactionVm.UserId = userId;
+            var transaction = mapper.Map<Transaction>(transactionVm);
+
+            await transactionRepository.Update(transaction);
+
+            return View("Index");
+        }
+
+        public async Task<JsonResult> Delete([FromQuery] int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var transaction = await transactionRepository.SearchForId(1, id);
+                await transactionRepository.Delete(transaction.Id, transaction.Mount, transaction.CountId);
+                return Json(true);
+                
             }
-            catch
+            catch(Exception ex)
             {
-                return View();
+                return Json(false);
             }
-        }
-        public ActionResult Delete(int id)
-        {
-            return View();
         }
 
-        [HttpPost]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
         #region private methods
         private async Task<IEnumerable<SelectListItem>> GetCounts(int userId, bool condition)
         {
@@ -171,6 +177,36 @@ namespace MoneyManager.Controllers
                 var transactions = await transactionRepository.GetTransactionsForNote(userId, description);
                 return Json(transactions);
 
+            }
+            catch (Exception ex)
+            {
+                return Json(new {error = ex, text = "No se encontraron transacciones"});
+
+            }
+        }
+
+         public async Task<JsonResult> GetTransactionXDateJson([FromQuery] string date = "" )
+        {
+            var userId = userService.GetUser();
+            try
+            {
+               var transactions = await transactionRepository.GetTransactionsForDate(userId, date);
+                return Json(transactions);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new {error = ex, text = "No se encontraron transacciones"});
+
+            }
+        }   
+        public async Task<JsonResult> GetTransactionXCatJson([FromQuery]  int categoryId)
+        {
+            var userId = userService.GetUser();
+            try
+            {
+               var transactions = await transactionRepository.SearchForCat(userId, categoryId);
+                return Json(transactions);
             }
             catch (Exception ex)
             {

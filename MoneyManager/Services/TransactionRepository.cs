@@ -12,7 +12,7 @@ namespace MoneyManager.Services
     public interface ITransactionRepository
     {
         Task Create(Transaction transaccion);
-        Task Delete(int id);
+        Task Delete(int id, decimal mount, int countId);
         Task<Transaction> GetForId(int id, int userId);
         Task<IEnumerable<Transaction>> GetTransactionsForCount(GetTransactionForCount model);
         Task<IEnumerable<Transaction>> GetTransactionsForExport(GetTransactionForCount model);
@@ -20,6 +20,10 @@ namespace MoneyManager.Services
         Task Update(Transaction transaction, decimal LastMount, int LastCountId);
         Task<IEnumerable<Transaction>> GetTransactionsForCategory(int userId, int categoryId);
         Task<IEnumerable<Transaction>> GetTransactionsForNote(int userId, string note);
+        Task<Transaction> SearchForId(int userId, int id);
+        Task Update(Transaction transaction);
+        Task<IEnumerable<Transaction>> GetTransactionsForDate(int userId, string date);
+        Task<IEnumerable<Transaction>> SearchForCat(int userId, int categoryId);
     }
     public class TransactionRepository : ITransactionRepository
     {
@@ -89,11 +93,11 @@ namespace MoneyManager.Services
                 new { id, userId });
         }
 
-        public async Task Delete(int id)
+        public async Task Delete(int transactionId, decimal mount, int countId )
         {
             using var connection = new SqlConnection(connectionString);
             await connection.ExecuteAsync("DeleteTransaction",
-                new { id }, commandType: System.Data.CommandType.StoredProcedure);
+                new { transactionId, mount, countId }, commandType: System.Data.CommandType.StoredProcedure);
         }
 
         public async Task<IEnumerable<Transaction>> GetTransactionsForCount(GetTransactionForCount model)
@@ -138,13 +142,62 @@ namespace MoneyManager.Services
         }
         public async Task<IEnumerable<Transaction>> GetTransactionsForNote(int userId, string note)
         {
+            note = $"%{note}%";
             using var connection = new SqlConnection(connectionString);
             return await connection.QueryAsync<Transaction>(@" 
               SELECT *
               FROM [MoneyManager].[dbo].[Transaction]
-              where Note = @note
+              where Note LIKE @note 
             ", new { userId, note});
+        } 
+        public async Task<IEnumerable<Transaction>> GetTransactionsForDate(int userId, string date)
+        {
+
+            date = $"{date} 00:00:00.000";
+            var converTestOne = DateTime.Parse(date);
+            var converTestTwo = converTestOne.ToString("yyy-MM-dd HH:mm:ss");
+
+
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Transaction>(@" 
+              SELECT *
+              FROM [MoneyManager].[dbo].[Transaction]
+              where DateTransaction = @date 
+            ", new { userId, date = converTestTwo });
         }
+          public async Task<Transaction> SearchForId(int userId, int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryFirstOrDefaultAsync<Transaction>(@" 
+                    select * from [MoneyManager].[dbo].[Transaction]
+                    where Id = @Id and UserId = @userId", new { id, userId });
+
+        }
+             
+        public async Task<IEnumerable<Transaction>> SearchForCat(int userId, int categoryId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Transaction>(@" 
+                    select * from [MoneyManager].[dbo].[Transaction]
+                    where CategoryId = @CategoryId and UserId = @userId", new { categoryId, userId });
+
+        }
+
+        public async Task Update(Transaction transaction)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync(@"UPDATE [MoneyManager].[dbo].[Transaction]
+             SET [UserId] = @UserId
+                  ,[DateTransaction] = @DateTransaction
+                  ,[Mount] = @Mount
+                  ,[Note] = @Note
+                  ,[CountId] = @CountId
+                  ,[CategoryId] = @CategoryId
+                  ,[Condition] = @Condition
+                    WHERE Id = @Id", transaction);
+        }
+
+
 
     }
 }
